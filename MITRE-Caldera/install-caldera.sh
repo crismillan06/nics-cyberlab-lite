@@ -110,12 +110,11 @@ echo "[i] PID del proceso: $CALDERA_PID"
 echo "[i] Log del servidor: $LOG_DIR/caldera-server.log"
 
 # ===============================
-# ESPERAR A QUE CALDERA ESTÉ LISTO (contador en una sola línea)
+# ESPERAR A QUE CALDERA ESTÉ LISTO (CONTADOR SIN TIMEOUT)
 # ===============================
 echo "[+] Esperando a que Caldera esté disponible..."
 
 CALDERA_URL="http://$(hostname -I | awk '{print $1}'):8888/login"
-TIMEOUT=380
 START_WAIT=$(date +%s)
 
 # Limpia la línea al salir (éxito, error, Ctrl+C)
@@ -123,26 +122,17 @@ cleanup_wait_line() { printf "\r\033[K"; }
 trap cleanup_wait_line EXIT
 
 while true; do
-    # Curl completamente silencioso (sin errores en pantalla)
+    # -f: falla si HTTP no es 2xx/3xx
+    # --max-time: evita cuelgues
     if curl -fs --max-time 2 -o /dev/null "$CALDERA_URL" >/dev/null 2>&1; then
         break
     fi
 
     NOW=$(date +%s)
     ELAPSED=$((NOW - START_WAIT))
-    REMAIN=$((TIMEOUT - ELAPSED))
-    (( REMAIN < 0 )) && REMAIN=0
 
-    # Actualiza siempre en la misma línea (borra resto de línea con \033[K)
-    printf "\r%s / %s (quedan %s)\033[K" \
-        "$(format_mmss "$ELAPSED")" "$(format_mmss "$TIMEOUT")" "$(format_mmss "$REMAIN")"
-
-    if (( ELAPSED >= TIMEOUT )); then
-        echo
-        echo "[✖] Timeout: Caldera no respondió en $TIMEOUT segundos."
-        echo "    Revisa el log: $LOG_DIR/caldera-server.log"
-        exit 1
-    fi
+    # Contador en la misma línea (solo transcurrido)
+    printf "\r⏱︎:: %s\033[K" "$(format_mmss "$ELAPSED")"
 
     sleep 3
 done
@@ -161,16 +151,22 @@ chown -R "$LOCAL_USER:$LOCAL_USER" "$LOCAL_USER_HOME/caldera_venv" 2>/dev/null |
 chown -R "$LOCAL_USER:$LOCAL_USER" "$LOG_DIR" 2>/dev/null || true
 
 # ===============================
-# TIEMPO TOTAL
+# TIEMPO TOTAL + RESUMEN FINAL
 # ===============================
 SCRIPT_END=$(date +%s)
+
+# IP "bonita" (informativa)
+HOST_IP="$(hostname -I 2>/dev/null | awk '{print $1}' || true)"
 
 echo "-----------------------------------------------"
 echo "[✔] Instalación de Caldera completada."
 echo "[⏱] Tiempo TOTAL: $(format_time $((SCRIPT_END-SCRIPT_START)))"
 echo "-----------------------------------------------"
 echo "Acceso Caldera:"
-echo "  URL      : http://$(hostname -I | awk '{print $1}'):8888"
+echo "  Local    : http://127.0.0.1:8888"
+if [[ -n "${HOST_IP:-}" ]]; then
+  echo "  Red      : http://$HOST_IP:8888"
+fi
 echo "  Usuario  : admin"
 echo "  Password : admin"
 echo
