@@ -131,7 +131,7 @@ Esta versión está pensada para funcionar en un host modesto, pero con recursos
 En VMware (Workstation/Player):
 
 1. **Create a New Virtual Machine**
-2. Seleccione ISO (Ubuntu/Debian recomendado)
+2. Seleccione ISO (Debian 12)
 3. Configure **CPU/RAM/DISCO** según tabla [sección 2](#vms-del-laboratorio-mismo-hardware-que-el-escenario-base)
 4. Red: seleccione **NAT**
 5. Marque la opción de instalar **SSH** durante la instalación.
@@ -562,3 +562,4 @@ ls -l
 ###### © NICS LAB — NICS | CyberLab Lite
 
 *Proyecto experimental para entornos de laboratorio y formación en ciberseguridad.*
+
