@@ -173,6 +173,10 @@ echo
 echo "Para detener Caldera:"
 echo "  kill \$(cat $LOG_DIR/caldera.pid)"
 echo
+echo "Para levantar Caldera de forma manual, tras reiniciar el equipo o matar el proceso:"
+echo "  cd ~/caldera"
+echo "  ~/caldera_venv/bin/python3 server.py --insecure"
+echo
 echo "Log completo disponible en:"
 echo "  $LOG_FILE"
 echo "===================================================="
